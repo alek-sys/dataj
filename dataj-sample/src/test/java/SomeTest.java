@@ -8,8 +8,8 @@ public class SomeTest {
 
     @Test
     public void shouldTest() {
-        PersonData f1 = new PersonData();
-        PersonData f2 = new PersonData();
+        PersonData f1 = new PersonData("alex", 22, "foo");
+        PersonData f2 = new PersonData("alex", 22, "foo");
 
         assertThat(f1, equalTo(f2));
     }

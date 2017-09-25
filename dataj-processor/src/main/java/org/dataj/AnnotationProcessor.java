@@ -34,13 +34,19 @@ public class AnnotationProcessor extends AbstractProcessor {
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(builderClassName)
                 .superclass(TypeName.get(clazz.asType()))
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-        clazz.getEnclosedElements().stream()
+        VariableElement[] variableElements = clazz.getEnclosedElements().stream()
                 .filter(e -> e instanceof VariableElement)
-                .map(e -> (VariableElement)e)
-                .map(this::buildMethodSpec)
-                .forEach(classBuilder::addMethod);
+                .map(e -> (VariableElement) e)
+                .toArray(VariableElement[]::new);
+
+        classBuilder.addMethod(buildConstructorSpec(variableElements));
+
+        for (VariableElement variableElement : variableElements) {
+            classBuilder.addMethod(buildGetterSpec(variableElement));
+            classBuilder.addMethod(buildSetterSpec(variableElement));
+        }
 
         JavaFile javaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), classBuilder.build())
                 .build();
@@ -55,17 +61,49 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
     }
 
-    private MethodSpec buildMethodSpec(VariableElement element) {
+    private MethodSpec buildConstructorSpec(VariableElement[] variableElements) {
+        MethodSpec.Builder builder = MethodSpec
+                .constructorBuilder()
+                .addModifiers(Modifier.PUBLIC);
+
+        for (VariableElement variableElement : variableElements) {
+            String name = variableElement.getSimpleName().toString();
+            ParameterSpec build = ParameterSpec
+                    .builder(TypeName.get(variableElement.asType()), name)
+                    .build();
+
+            builder.addParameter(build);
+            builder.addStatement("this.$L = $L", name, name);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildGetterSpec(VariableElement element) {
         String fieldName = element.getSimpleName().toString();
         return MethodSpec
-                .methodBuilder(getGetterMethodName(fieldName))
+                .methodBuilder(getMethodName("get", fieldName))
                 .returns(TypeName.get(element.asType()))
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("return $L", fieldName)
                 .build();
     }
 
-    private String getGetterMethodName(String fieldName) {
-        return String.format("get%s", fieldName);
+    private MethodSpec buildSetterSpec(VariableElement element) {
+        final String fieldName = element.getSimpleName().toString();
+        final ParameterSpec value = ParameterSpec.builder(TypeName.get(element.asType()), "value").build();
+
+        return MethodSpec
+                .methodBuilder(getMethodName("set", fieldName))
+                .addParameter(value)
+                .returns(TypeName.VOID)
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("$L = value", fieldName)
+                .build();
+    }
+
+    private String getMethodName(String prefix, String fieldName) {
+        final String methodName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+        return prefix + methodName;
     }
 }
