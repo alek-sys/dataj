@@ -1,0 +1,16 @@
+subprojects {
+    apply plugin: 'java'
+
+    targetCompatibility = 9
+    sourceCompatibility = 9
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+project(":dataj-sample") {
+    dependencies {
+        compileOnly project(":dataj-processor")
+    }
+}

@@ -1,0 +1,18 @@
+plugins {
+    id 'maven-publish'
+}
+
+group = 'org.dataj'
+version = 0.1
+
+ext {
+    autoServiceVersion = '1.0-rc3'
+}
+
+dependencies {
+    compile 'com.squareup:javapoet:1.9.0'
+    compileOnly "com.google.auto.service:auto-service:$autoServiceVersion"
+    compileOnly 'com.google.guava:guava:22.0'
+
+    testCompile 'com.google.testing.compile:compile-testing:0.12'
+}
