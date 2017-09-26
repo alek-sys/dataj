@@ -1,56 +1,58 @@
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import org.dataj.AnnotationProcessor;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
-public class AnnotationProcessorTest {
+@DisplayName("when processing a class with a single non final field")
+class AnnotationProcessorTest {
 
     private Compilation compilation;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         compilation = compile("@Data class Test { int field; }");
     }
 
-    @Test
-    public void shouldGenerateCompanionDataClass() {
+    @Test @DisplayName("should generate a companion data class")
+    void testDataClass() {
         assertThat(compilation).succeeded();
     }
 
-    @Test
-    public void shouldGenerateClassWithSuffix() {
+    @Test @DisplayName("should generate a companion data class with default suffix")
+    void testSuffix() {
         assertThat(compilation)
                 .generatedSourceFile("TestData")
                 .contentsAsUtf8String()
                 .isNotEmpty();
     }
 
-    @Test
-    public void shouldGeneratePublicFinalClass() {
+    @Test @DisplayName("should generate a public and final class")
+    void testPublicFinalClass() {
         assertGeneratedSourceIncludes("public final class TestData");
     }
 
-    @Test
-    public void shouldExtendProvidedClass() throws Exception {
+    @Test @DisplayName("should extend an annotated class")
+    void testExtendProvidedClass() throws Exception {
         assertGeneratedSourceIncludes("extends Test \\{");
     }
 
-    @Test
-    public void shouldGenerateGettersForNonFinalFields() {
+    @Test @DisplayName("should generate getter for a field")
+    void testGetters() {
         assertGeneratedSourceIncludes("public int getField\\(\\) \\{\\s+return field;\\s+}");
     }
 
-    @Test
-    public void shouldGenerateSettersForNonFinalFields() {
+    @Test @DisplayName("should generate setter for a field")
+    void testSetters() {
         assertGeneratedSourceIncludes("public void setField\\(int value\\) \\{\\s+field = value;\\s+}");
     }
 
-    @Test
-    public void shouldGenerateConstructor() throws Exception {
+    @Test @DisplayName("should generate an all-args constructors")
+    void testConstructor() throws Exception {
         assertGeneratedSourceIncludes("public TestData\\(int field\\) \\{\\s+this.field = field;\\s+}");
     }
 
