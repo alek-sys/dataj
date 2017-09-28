@@ -11,6 +11,8 @@ import static com.google.testing.compile.Compiler.javac;
 @DisplayName("when processing a class with a single non final field")
 class AnnotationProcessorTest {
 
+    final String fileHeader = "package com.example; import org.dataj.Data; ";
+    final String filePath = "com.example.TestData";
     private Compilation compilation;
 
     @BeforeEach
@@ -18,7 +20,7 @@ class AnnotationProcessorTest {
         compilation = compile("@Data class Test { int field; }");
     }
 
-    @Test @DisplayName("should generate a companion data class")
+    @Test @DisplayName("should successfully compile when an annotation applied")
     void testDataClass() {
         assertThat(compilation).succeeded();
     }
@@ -26,7 +28,7 @@ class AnnotationProcessorTest {
     @Test @DisplayName("should generate a companion data class with default suffix")
     void testSuffix() {
         assertThat(compilation)
-                .generatedSourceFile("TestData")
+                .generatedSourceFile(filePath)
                 .contentsAsUtf8String()
                 .isNotEmpty();
     }
@@ -36,9 +38,9 @@ class AnnotationProcessorTest {
         assertGeneratedSourceIncludes("public final class TestData");
     }
 
-    @Test @DisplayName("should extend an annotated class")
-    void testExtendProvidedClass() throws Exception {
-        assertGeneratedSourceIncludes("extends Test \\{");
+    @Test @DisplayName("should generate backing fields for fields from initial class")
+    void testFields() {
+        assertGeneratedSourceIncludes("private int field;");
     }
 
     @Test @DisplayName("should generate getter for a field")
@@ -58,16 +60,14 @@ class AnnotationProcessorTest {
 
     private void assertGeneratedSourceIncludes(String regex) {
         assertThat(compilation)
-                .generatedSourceFile("TestData")
+                .generatedSourceFile(filePath)
                 .contentsAsUtf8String()
                 .containsMatch(regex);
     }
 
     private Compilation compile(String source) {
-        final String imports = "import org.dataj.Data; ";
-
         return javac()
             .withProcessors(new AnnotationProcessor())
-            .compile(JavaFileObjects.forSourceString("Test", imports + source));
+            .compile(JavaFileObjects.forSourceString("Test", fileHeader + source));
     }
 }

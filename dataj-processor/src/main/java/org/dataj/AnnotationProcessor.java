@@ -44,6 +44,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         classBuilder.addMethod(buildConstructorSpec(variableElements));
 
         for (VariableElement variableElement : variableElements) {
+            classBuilder.addField(buildField(variableElement));
             classBuilder.addMethod(buildGetterSpec(variableElement));
             classBuilder.addMethod(buildSetterSpec(variableElement));
         }
@@ -59,6 +60,14 @@ public class AnnotationProcessor extends AbstractProcessor {
         } catch (IOException ex) {
 
         }
+    }
+
+    private FieldSpec buildField(VariableElement variableElement) {
+        return FieldSpec.builder(
+                TypeName.get(variableElement.asType()),
+                variableElement.getSimpleName().toString(),
+                Modifier.PRIVATE)
+                .build();
     }
 
     private MethodSpec buildConstructorSpec(VariableElement[] variableElements) {
