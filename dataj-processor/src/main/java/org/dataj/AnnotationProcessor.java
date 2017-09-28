@@ -30,10 +30,10 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private void writeDataClassFor(TypeElement clazz) {
         String builderClassName = clazz.getSimpleName() + "Data";
+        String builderFileName = clazz.getQualifiedName() + "Data";
         PackageElement packageElement = (PackageElement) clazz.getEnclosingElement();
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(builderClassName)
-                .superclass(TypeName.get(clazz.asType()))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         VariableElement[] variableElements = clazz.getEnclosedElements().stream()
@@ -52,7 +52,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 .build();
 
         try {
-            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderClassName);
+            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderFileName);
             try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
                 javaFile.writeTo(out);
             }
