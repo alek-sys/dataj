@@ -58,6 +58,16 @@ class AnnotationProcessorTest {
         assertGeneratedSourceIncludes("public TestData\\(int field\\) \\{\\s+this.field = field;\\s+}");
     }
 
+    @Test @DisplayName("should add annotation to the getter")
+    void testAnnotation() throws Exception {
+        compilation = compile("import javax.annotation.Nonnull; @Data class Test { @Nonnull int field; }");
+
+        assertThat(compilation)
+                .generatedSourceFile(filePath)
+                .contentsAsUtf8String()
+                .containsMatch("\\@Nonnull\\s+public int getField\\(\\) \\{\\s+return field;\\s+}");
+    }
+
     private void assertGeneratedSourceIncludes(String regex) {
         assertThat(compilation)
                 .generatedSourceFile(filePath)

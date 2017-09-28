@@ -90,12 +90,17 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private MethodSpec buildGetterSpec(VariableElement element) {
         String fieldName = element.getSimpleName().toString();
-        return MethodSpec
+
+        MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(getMethodName("get", fieldName))
                 .returns(TypeName.get(element.asType()))
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("return $L", fieldName)
-                .build();
+                .addStatement("return $L", fieldName);
+
+        element.getAnnotationMirrors().forEach(annotationMirror ->
+                builder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+
+        return builder.build();
     }
 
     private MethodSpec buildSetterSpec(VariableElement element) {
