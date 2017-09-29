@@ -9,6 +9,9 @@ import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes("org.dataj.Data")
@@ -49,6 +52,8 @@ public class AnnotationProcessor extends AbstractProcessor {
             classBuilder.addMethod(buildSetterSpec(variableElement));
         }
 
+        classBuilder.addMethod(buildHashcodeSpec(variableElements));
+
         JavaFile javaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), classBuilder.build())
                 .build();
 
@@ -62,11 +67,27 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
     }
 
+    private MethodSpec buildHashcodeSpec(VariableElement[] variableElements) {
+        final Object[] fieldNames = Arrays.stream(variableElements)
+                .map(VariableElement::getSimpleName)
+                .toArray();
+
+        final List<String> strs = Collections.nCopies(variableElements.length, "$L");
+        final String pattern = String.format("return java.util.Objects.hash(%s)", String.join(", ", strs));
+
+        return MethodSpec.methodBuilder("hashCode")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(TypeName.INT)
+                .addStatement(pattern, fieldNames)
+                .build();
+    }
+
     private FieldSpec buildField(VariableElement variableElement) {
         return FieldSpec.builder(
-                TypeName.get(variableElement.asType()),
-                variableElement.getSimpleName().toString(),
-                Modifier.PRIVATE)
+                    TypeName.get(variableElement.asType()),
+                    variableElement.getSimpleName().toString(),
+                    Modifier.PRIVATE)
                 .build();
     }
 

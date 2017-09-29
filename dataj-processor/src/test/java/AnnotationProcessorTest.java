@@ -68,6 +68,19 @@ class AnnotationProcessorTest {
                 .containsMatch("\\@Nonnull\\s+public int getField\\(\\) \\{\\s+return field;\\s+}");
     }
 
+    @Test @DisplayName("should generate hashcode method")
+    void testHashCode() {
+        Compilation twoFields = compile("@Data class Test { String name; int age; }");
+
+        assertThat(twoFields)
+                .generatedSourceFile(filePath)
+                .contentsAsUtf8String()
+                .containsMatch("\\@Override\\s+" +
+                                "public int hashCode\\(\\) \\{" +
+                                "\\s+return java.util.Objects.hash\\(name, age\\)\\;" +
+                                "\\s+\\}");
+    }
+
     private void assertGeneratedSourceIncludes(String regex) {
         assertThat(compilation)
                 .generatedSourceFile(filePath)
