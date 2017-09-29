@@ -29,6 +29,8 @@ dependencies {
 
     testCompile 'com.google.testing.compile:compile-testing:0.12'
     testCompile "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
+    testCompileOnly 'com.github.javaparser:javaparser-core:3.3.4'
+
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
     testRuntime "org.junit.platform:junit-platform-launcher:${junitPlatformVersion}"
 

@@ -9,10 +9,7 @@ import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SupportedAnnotationTypes("org.dataj.Data")
 @SupportedSourceVersion(SourceVersion.RELEASE_9)
@@ -21,8 +18,8 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (TypeElement element: annotations) {
-            for (Element el: roundEnv.getElementsAnnotatedWith(element)) {
+        for (TypeElement element : annotations) {
+            for (Element el : roundEnv.getElementsAnnotatedWith(element)) {
                 TypeElement clazz = (TypeElement) el;
                 writeDataClassFor(clazz);
             }
@@ -53,6 +50,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
 
         classBuilder.addMethod(buildHashcodeSpec(variableElements));
+        classBuilder.addMethod(buildEqualsSpec(variableElements, builderClassName));
 
         JavaFile javaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), classBuilder.build())
                 .build();
@@ -67,27 +65,55 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
     }
 
+    private MethodSpec buildEqualsSpec(VariableElement[] fields, String ownType) {
+        final Object[] fieldNames = getFieldNames(fields);
+
+        ArrayList<String> strs = new ArrayList<>();
+        for (int i = 1; i <= fieldNames.length; i++) {
+            strs.add(String.format("Objects.equals($%dL, other.$%dL)", i + 1, i + 1));
+        }
+
+        final String pattern = String.format(
+                "if (this == o) return true;\n" +
+                "if (o == null || getClass() != o.getClass()) return false;\n" +
+                "$1L other = ($1L) o;\n" +
+                "return %s",
+                String.join(" && ", strs));
+
+        return MethodSpec.methodBuilder("equals")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(TypeName.OBJECT, "o")
+                .returns(TypeName.BOOLEAN)
+                .addStatement(pattern, concatArrays(ownType, fieldNames))
+                .build();
+    }
+
     private MethodSpec buildHashcodeSpec(VariableElement[] variableElements) {
-        final Object[] fieldNames = Arrays.stream(variableElements)
-                .map(VariableElement::getSimpleName)
-                .toArray();
+        final Object[] fieldNames = getFieldNames(variableElements);
 
         final List<String> strs = Collections.nCopies(variableElements.length, "$L");
-        final String pattern = String.format("return java.util.Objects.hash(%s)", String.join(", ", strs));
+        final String pattern = String.format("return $T.hash(%s)", String.join(", ", strs));
 
         return MethodSpec.methodBuilder("hashCode")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .returns(TypeName.INT)
-                .addStatement(pattern, fieldNames)
+                .addStatement(pattern, concatArrays(Objects.class, fieldNames))
                 .build();
+    }
+
+    private Object[] getFieldNames(VariableElement[] variableElements) {
+        return Arrays.stream(variableElements)
+                .map(VariableElement::getSimpleName)
+                .toArray();
     }
 
     private FieldSpec buildField(VariableElement variableElement) {
         return FieldSpec.builder(
-                    TypeName.get(variableElement.asType()),
-                    variableElement.getSimpleName().toString(),
-                    Modifier.PRIVATE)
+                TypeName.get(variableElement.asType()),
+                variableElement.getSimpleName().toString(),
+                Modifier.PRIVATE)
                 .build();
     }
 
@@ -140,5 +166,13 @@ public class AnnotationProcessor extends AbstractProcessor {
     private String getMethodName(String prefix, String fieldName) {
         final String methodName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
         return prefix + methodName;
+    }
+
+    private Object[] concatArrays(Object head, Object[] tail) {
+        Object[] result = new Object[tail.length + 1];
+        result[0] = head;
+        System.arraycopy(tail, 0, result, 1, tail.length);
+
+        return result;
     }
 }

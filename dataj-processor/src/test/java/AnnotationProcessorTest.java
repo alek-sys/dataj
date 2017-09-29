@@ -1,12 +1,22 @@
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import org.dataj.AnnotationProcessor;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.util.List;
+
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
+import static org.hamcrest.CoreMatchers.is;
 
 @DisplayName("when processing a class with a single non final field")
 class AnnotationProcessorTest {
@@ -69,16 +79,43 @@ class AnnotationProcessorTest {
     }
 
     @Test @DisplayName("should generate hashcode method")
-    void testHashCode() {
+    void testHashCode() throws IOException {
         Compilation twoFields = compile("@Data class Test { String name; int age; }");
 
-        assertThat(twoFields)
-                .generatedSourceFile(filePath)
-                .contentsAsUtf8String()
-                .containsMatch("\\@Override\\s+" +
-                                "public int hashCode\\(\\) \\{" +
-                                "\\s+return java.util.Objects.hash\\(name, age\\)\\;" +
-                                "\\s+\\}");
+        JavaFileObject javaFileObject = twoFields.generatedSourceFile("com.example.TestData").get();
+        CompilationUnit reference = JavaParser.parseResource("TestData.java");
+        CompilationUnit actual = JavaParser.parse(javaFileObject.openInputStream());
+
+        ClassOrInterfaceDeclaration referenceClass = reference.getClassByName("TestData").get();
+        ClassOrInterfaceDeclaration actualClass = actual.getClassByName("TestData").get();
+
+        MatcherAssert.assertThat(methodsAreEqual(referenceClass, actualClass, "hashCode"), is(true));
+    }
+
+    @Test @DisplayName("should generate equals method")
+    void testEquals() throws IOException {
+        Compilation twoFields = compile("@Data class Test { String name; int age; }");
+
+        JavaFileObject javaFileObject = twoFields.generatedSourceFile("com.example.TestData").get();
+        CompilationUnit reference = JavaParser.parseResource("TestData.java");
+        CompilationUnit actual = JavaParser.parse(javaFileObject.openInputStream());
+
+        ClassOrInterfaceDeclaration referenceClass = reference.getClassByName("TestData").get();
+        ClassOrInterfaceDeclaration actualClass = actual.getClassByName("TestData").get();
+
+        org.hamcrest.MatcherAssert.assertThat(methodsAreEqual(referenceClass, actualClass, "equals", "Object"), is(true));
+    }
+
+    private boolean methodsAreEqual(
+            ClassOrInterfaceDeclaration reference,
+            ClassOrInterfaceDeclaration actual,
+            String methodName,
+            String ...paramTypes) {
+
+        List<MethodDeclaration> referenceMethod = reference.getMethodsBySignature(methodName, paramTypes);
+        List<MethodDeclaration> actualMethod = actual.getMethodsBySignature(methodName, paramTypes);
+
+        return referenceMethod.equals(actualMethod);
     }
 
     private void assertGeneratedSourceIncludes(String regex) {
