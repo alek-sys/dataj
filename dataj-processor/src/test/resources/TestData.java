@@ -4,6 +4,22 @@ class TestData {
     String name;
     int age;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int value) {
+        this.age = value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

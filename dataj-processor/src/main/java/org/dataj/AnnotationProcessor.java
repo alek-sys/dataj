@@ -159,7 +159,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 .addParameter(value)
                 .returns(TypeName.VOID)
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("$L = value", fieldName)
+                .addStatement("this.$L = value", fieldName)
                 .build();
     }
 
