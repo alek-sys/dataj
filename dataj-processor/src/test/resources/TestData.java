@@ -1,3 +1,4 @@
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 class TestData {
@@ -9,6 +10,7 @@ class TestData {
         this.age = age;
     }
 
+    @Nonnull
     public String getName() {
         return name;
     }

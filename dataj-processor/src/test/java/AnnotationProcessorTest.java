@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @DisplayName("when processing a class with a single non final field")
 class AnnotationProcessorTest {
 
-    final String fileHeader = "package com.example; import org.dataj.Data; ";
+    final String fileHeader = "package com.example; import org.dataj.Data; import javax.annotation.Nonnull; ";
     final String filePath = "com.example.TestData";
     private Compilation compilation;
     private CompilationUnit referenceSource;
@@ -28,7 +28,7 @@ class AnnotationProcessorTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        compilation = compile("@Data class Test { String name; int age; }");
+        compilation = compile("@Data class Test { @Nonnull String name; int age; }");
 
         JavaFileObject outputFile = compilation.generatedSourceFile("com.example.TestData").get();
         actualSource = JavaParser.parse(outputFile.openInputStream());
@@ -70,12 +70,9 @@ class AnnotationProcessorTest {
 
     @Test @DisplayName("should add annotation to the getter")
     void testAnnotation() throws Exception {
-        compilation = compile("import javax.annotation.Nonnull; @Data class Test { @Nonnull int field; }");
-
-        CompilationSubject.assertThat(compilation)
-                .generatedSourceFile(filePath)
-                .contentsAsUtf8String()
-                .containsMatch("\\@Nonnull\\s+public int getField\\(\\) \\{\\s+return field;\\s+}");
+        final String getterWithAnnotationName = "getName";
+        assertThat(actualSource, andCompilationUnit(referenceSource).hasSame(
+            method(getterWithAnnotationName).ofClass("TestData")));
     }
 
     @Test @DisplayName("should generate hashcode method")
