@@ -20,11 +20,9 @@ import static org.dataj.test.FieldDeclarationMatcherBuilder.fieldNamed;
 import static org.dataj.test.MethodDeclarationMatcherBuilder.method;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@DisplayName("when processing a class with a single non final field")
+@DisplayName("when processing a class with two non final fields")
 class AnnotationProcessorTest {
 
-    final String fileHeader = "package com.example; import org.dataj.Data; import javax.annotation.Nonnull; ";
-    final String filePath = "com.example.TestData";
     private Compilation compilation;
     private CompilationUnit referenceSource;
     private CompilationUnit actualSource;
@@ -91,14 +89,8 @@ class AnnotationProcessorTest {
             .hasSame(method("equals").ofClass("TestData").withParams("Object")));
     }
 
-    private void assertGeneratedSourceIncludes(String regex) {
-        CompilationSubject.assertThat(compilation)
-                .generatedSourceFile(filePath)
-                .contentsAsUtf8String()
-                .containsMatch(regex);
-    }
-
     private Compilation compile(String source) {
+        String fileHeader = "package com.example; import org.dataj.Data; import javax.annotation.Nonnull; ";
         return javac()
             .withProcessors(new AnnotationProcessor())
             .compile(JavaFileObjects.forSourceString("Test", fileHeader + source));
