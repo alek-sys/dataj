@@ -2,7 +2,7 @@ package org.dataj.test;
 
 import com.github.javaparser.ast.CompilationUnit;
 
-public class ConstructorDeclarationMatcherBuilder {
+public class ConstructorDeclarationMatcherBuilder implements MatcherBuilder {
     private String className;
     private String[] params;
 
@@ -24,6 +24,7 @@ public class ConstructorDeclarationMatcherBuilder {
         return this;
     }
 
+    @Override
     public ConstructorDeclarationMatcher build(CompilationUnit compilationUnit) {
         return new ConstructorDeclarationMatcher(compilationUnit, this.className, params);
     }

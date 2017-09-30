@@ -4,7 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Strings;
 import org.hamcrest.BaseMatcher;
 
-public class MethodDeclarationMatcherBuilder {
+public class MethodDeclarationMatcherBuilder implements MatcherBuilder {
 
     private final String methodName;
     private String[] params;
@@ -28,7 +28,8 @@ public class MethodDeclarationMatcherBuilder {
         return this;
     }
 
-    BaseMatcher<CompilationUnit> build(CompilationUnit compilationUnit) {
+    @Override
+    public BaseMatcher<CompilationUnit> build(CompilationUnit compilationUnit) {
         if (Strings.isNullOrEmpty(className) || Strings.isNullOrEmpty(methodName)) {
             throw new IllegalArgumentException(
                 "Cannot build method matcher without class name and method name, use method(<name>).ofClass(<name>)");

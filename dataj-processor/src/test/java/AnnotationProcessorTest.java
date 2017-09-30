@@ -12,6 +12,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 
 import static com.google.testing.compile.Compiler.javac;
+import static org.dataj.test.ClassDeclarationMatcherBuilder.classNamed;
 import static org.dataj.test.CompilationUnitMatcherBuilder.andCompilationUnit;
 import static org.dataj.test.ConstructorDeclarationMatcherBuilder.constructor;
 import static org.dataj.test.MethodDeclarationMatcherBuilder.method;
@@ -42,7 +43,8 @@ class AnnotationProcessorTest {
 
     @Test @DisplayName("should generate a public and final class")
     void testPublicFinalClass() {
-        assertGeneratedSourceIncludes("public final class TestData");
+        assertThat(actualSource, andCompilationUnit(referenceSource)
+            .hasSame(classNamed("TestData")));
     }
 
     @Test @DisplayName("should generate backing fields for fields from initial class")

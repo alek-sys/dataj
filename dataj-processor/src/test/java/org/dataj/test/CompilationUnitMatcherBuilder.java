@@ -14,11 +14,7 @@ public class CompilationUnitMatcherBuilder {
         return new CompilationUnitMatcherBuilder(compilationUnit);
     }
 
-    public BaseMatcher<CompilationUnit> hasSame(MethodDeclarationMatcherBuilder methodDeclarationMatcherBuilder) {
-        return methodDeclarationMatcherBuilder.build(compilationUnit);
-    }
-
-    public BaseMatcher<CompilationUnit> hasSame(ConstructorDeclarationMatcherBuilder constructorDeclarationMatcherBuilder) {
-        return constructorDeclarationMatcherBuilder.build(compilationUnit);
+    public BaseMatcher<CompilationUnit> hasSame(MatcherBuilder matcherBuilder) {
+        return matcherBuilder.build(compilationUnit);
     }
 }
