@@ -14,7 +14,9 @@ import java.io.IOException;
 import static com.google.testing.compile.Compiler.javac;
 import static org.dataj.test.ClassDeclarationMatcherBuilder.classNamed;
 import static org.dataj.test.CompilationUnitMatcherBuilder.andCompilationUnit;
+import static org.dataj.test.CompilationUnitMatcherBuilder.has;
 import static org.dataj.test.ConstructorDeclarationMatcherBuilder.constructor;
+import static org.dataj.test.FieldDeclarationMatcherBuilder.fieldNamed;
 import static org.dataj.test.MethodDeclarationMatcherBuilder.method;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -49,7 +51,7 @@ class AnnotationProcessorTest {
 
     @Test @DisplayName("should generate backing fields for fields from initial class")
     void testFields() {
-        assertGeneratedSourceIncludes("private int age;");
+        assertThat(actualSource, has(fieldNamed("age").inClass("TestData").ofType("int").isPrivate()));
     }
 
     @Test @DisplayName("should generate getter for a field")

@@ -14,6 +14,10 @@ public class CompilationUnitMatcherBuilder {
         return new CompilationUnitMatcherBuilder(compilationUnit);
     }
 
+    public static BaseMatcher<CompilationUnit> has(MatcherBuilder matcherBuilder) {
+        return matcherBuilder.build(null);
+    }
+
     public BaseMatcher<CompilationUnit> hasSame(MatcherBuilder matcherBuilder) {
         return matcherBuilder.build(compilationUnit);
     }
