@@ -17,4 +17,8 @@ public class CompilationUnitMatcherBuilder {
     public BaseMatcher<CompilationUnit> hasSame(MethodDeclarationMatcherBuilder methodDeclarationMatcherBuilder) {
         return methodDeclarationMatcherBuilder.build(compilationUnit);
     }
+
+    public BaseMatcher<CompilationUnit> hasSame(ConstructorDeclarationMatcherBuilder constructorDeclarationMatcherBuilder) {
+        return constructorDeclarationMatcherBuilder.build(compilationUnit);
+    }
 }

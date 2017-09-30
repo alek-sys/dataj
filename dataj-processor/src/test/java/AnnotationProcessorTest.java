@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import static com.google.testing.compile.Compiler.javac;
 import static org.dataj.test.CompilationUnitMatcherBuilder.andCompilationUnit;
+import static org.dataj.test.ConstructorDeclarationMatcherBuilder.constructor;
 import static org.dataj.test.MethodDeclarationMatcherBuilder.method;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -63,7 +64,8 @@ class AnnotationProcessorTest {
 
     @Test @DisplayName("should generate an all-args constructors")
     void testConstructor() throws Exception {
-        assertGeneratedSourceIncludes("public TestData\\(String name, int age\\) \\{\\s+this.name = name;\\s+this.age = age;\\s+}");
+        assertThat(actualSource, andCompilationUnit(referenceSource)
+            .hasSame(constructor().ofClass("TestData").withParams("String", "int")));
     }
 
     @Test @DisplayName("should add annotation to the getter")
