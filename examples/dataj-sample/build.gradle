@@ -1,6 +1,8 @@
+apply plugin: 'java'
 apply plugin: 'idea'
 
 dependencies {
+    compile 'org.dataj:dataj-processor:0.1'
     testCompile 'junit:junit:4.12'
 }
 

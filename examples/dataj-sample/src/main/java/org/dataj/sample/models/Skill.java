@@ -4,5 +4,5 @@ import org.dataj.Data;
 
 @Data
 public class Skill {
-    String skill;
+    String skillInfo;
 }

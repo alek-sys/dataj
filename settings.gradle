@@ -1,1 +1,1 @@
-include 'dataj-processor', 'dataj-sample'
+include 'dataj-processor', 'examples:dataj-hibernate', 'examples:dataj-sample'
