@@ -7,11 +7,23 @@ buildscript {
     }
 }
 
-plugins {
-    id 'maven-publish'
+apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
-apply plugin: 'org.junit.platform.gradle.plugin'
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
 
 group = 'org.dataj'
 version = 0.1
@@ -23,13 +35,14 @@ ext {
 }
 
 dependencies {
-    compile 'com.squareup:javapoet:1.9.0'
-    compileOnly "com.google.auto.service:auto-service:$autoServiceVersion"
-    compileOnly 'com.google.guava:guava:22.0'
+    api 'com.squareup:javapoet:1.9.0'
+    api 'com.google.guava:guava:22.0'
+    implementation "com.google.auto.service:auto-service:$autoServiceVersion"
 
+    testCompile 'com.squareup:javapoet:1.9.0'
     testCompile 'com.google.testing.compile:compile-testing:0.12'
     testCompile "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
-    testCompileOnly 'com.github.javaparser:javaparser-core:3.3.4'
+    testCompile 'com.github.javaparser:javaparser-core:3.3.4'
 
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
     testRuntime "org.junit.platform:junit-platform-launcher:${junitPlatformVersion}"
