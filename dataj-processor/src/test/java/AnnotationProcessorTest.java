@@ -90,7 +90,10 @@ class AnnotationProcessorTest {
     }
 
     private Compilation compile(String source) {
-        String fileHeader = "package com.example; import org.dataj.Data; import javax.annotation.Nonnull; ";
+        String fileHeader = "package com.example; " +
+                "import org.dataj.Data; " +
+                "import javax.annotation.Nonnull; ";
+
         return javac()
             .withProcessors(new AnnotationProcessor())
             .compile(JavaFileObjects.forSourceString("Test", fileHeader + source));

@@ -1,7 +1,9 @@
 import javax.annotation.Nonnull;
+import java.lang.annotation.Documented;
 import java.util.Objects;
+import com.example.Entity;
 
-class TestData {
+public final class TestData {
     String name;
     int age;
 

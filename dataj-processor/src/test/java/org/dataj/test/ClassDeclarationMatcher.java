@@ -20,11 +20,12 @@ public class ClassDeclarationMatcher extends BaseMatcher<CompilationUnit> {
     public boolean matches(Object item) {
         CompilationUnit actual = (CompilationUnit) item;
         Optional<ClassOrInterfaceDeclaration> actualClass = actual.getClassByName(className);
-        Optional<ClassOrInterfaceDeclaration> expectedClass = actual.getClassByName(className);
+        Optional<ClassOrInterfaceDeclaration> expectedClass = compilationUnit.getClassByName(className);
 
         return actualClass.isPresent() && expectedClass.isPresent()
                 && actualClass.get().getNameAsString().equals(expectedClass.get().getNameAsString())
-                && actualClass.get().getModifiers().equals(expectedClass.get().getModifiers());
+                && actualClass.get().getModifiers().equals(expectedClass.get().getModifiers())
+                && actualClass.get().getAnnotations().equals(expectedClass.get().getAnnotations());
 
     }
 

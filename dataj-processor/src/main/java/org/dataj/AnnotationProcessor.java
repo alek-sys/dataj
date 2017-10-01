@@ -36,6 +36,8 @@ public class AnnotationProcessor extends AbstractProcessor {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(builderClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
+        copyAnnotations(clazz, classBuilder);
+
         VariableElement[] variableElements = clazz.getEnclosedElements().stream()
                 .filter(e -> e instanceof VariableElement)
                 .map(e -> (VariableElement) e)
@@ -63,6 +65,15 @@ public class AnnotationProcessor extends AbstractProcessor {
         } catch (IOException ex) {
 
         }
+    }
+
+    private void copyAnnotations(TypeElement clazz, TypeSpec.Builder classBuilder) {
+        clazz.getAnnotationMirrors().forEach(annotation -> {
+            final String annotationTypeName = annotation.getAnnotationType().toString();
+            if (!annotationTypeName.equals(Data.class.getTypeName())) {
+                classBuilder.addAnnotation(AnnotationSpec.get(annotation));
+            }
+        });
     }
 
     private MethodSpec buildEqualsSpec(VariableElement[] fields, String ownType) {
