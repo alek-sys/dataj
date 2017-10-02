@@ -26,8 +26,8 @@ public class AnnotationProcessor extends AbstractProcessor {
                     writeDataClassFor(clazz);
                 } catch (IOException e) {
                     Messager messager = processingEnv.getMessager();
-                    String msg = String.format("Failed to generated source: %s", e.getMessage());
-                    messager.printMessage(Diagnostic.Kind.ERROR, msg);
+                    String msg = String.format("dataj: %s", e.getMessage());
+                    messager.printMessage(Diagnostic.Kind.WARNING, msg);
                 }
             }
         }
@@ -47,16 +47,18 @@ public class AnnotationProcessor extends AbstractProcessor {
 
         VariableElement[] fieldElements = getFieldElements(clazz);
 
-        classBuilder.addMethod(buildConstructorSpec(fieldElements));
+        if (fieldElements.length != 0) {
+            classBuilder.addMethod(buildConstructorSpec(fieldElements));
 
-        for (VariableElement fieldElement : fieldElements) {
-            classBuilder.addField(buildField(fieldElement));
-            classBuilder.addMethod(buildGetterSpec(fieldElement));
-            classBuilder.addMethod(buildSetterSpec(fieldElement));
+            for (VariableElement fieldElement : fieldElements) {
+                classBuilder.addField(buildField(fieldElement));
+                classBuilder.addMethod(buildGetterSpec(fieldElement));
+                classBuilder.addMethod(buildSetterSpec(fieldElement));
+            }
+
+            classBuilder.addMethod(buildHashcodeSpec(fieldElements));
+            classBuilder.addMethod(buildEqualsSpec(fieldElements, builderClassName));
         }
-
-        classBuilder.addMethod(buildHashcodeSpec(fieldElements));
-        classBuilder.addMethod(buildEqualsSpec(fieldElements, builderClassName));
 
         JavaFile javaFile = JavaFile
             .builder(packageElement.getQualifiedName().toString(), classBuilder.build())
