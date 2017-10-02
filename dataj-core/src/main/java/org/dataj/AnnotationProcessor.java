@@ -1,6 +1,7 @@
 package org.dataj;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.*;
@@ -16,6 +17,9 @@ import java.util.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_9)
 @AutoService(Processor.class)
 public class AnnotationProcessor extends AbstractProcessor {
+
+    final private Set<String> JSR305_ANNOTATIONS =
+            Sets.newHashSet("javax.annotation.Nonnull", "javax.annotation.Nullable", "javax.annotation.CheckForNull");
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -138,22 +142,32 @@ public class AnnotationProcessor extends AbstractProcessor {
                 .build();
     }
 
-    private MethodSpec buildConstructorSpec(VariableElement[] variableElements) {
+    private MethodSpec buildConstructorSpec(VariableElement[] fieldElements) {
         MethodSpec.Builder builder = MethodSpec
                 .constructorBuilder()
                 .addModifiers(Modifier.PUBLIC);
 
-        for (VariableElement variableElement : variableElements) {
-            String name = variableElement.getSimpleName().toString();
-            ParameterSpec build = ParameterSpec
-                    .builder(TypeName.get(variableElement.asType()), name)
-                    .build();
-
-            builder.addParameter(build);
+        for (VariableElement fieldElement : fieldElements) {
+            String name = fieldElement.getSimpleName().toString();
+            builder.addParameter(getParameterSpec(fieldElement, name));
             builder.addStatement("this.$L = $L", name, name);
         }
 
         return builder.build();
+    }
+
+    private ParameterSpec getParameterSpec(VariableElement fieldElement, String name) {
+        ParameterSpec.Builder paramBuilder = ParameterSpec
+                .builder(TypeName.get(fieldElement.asType()), name);
+
+        fieldElement.getAnnotationMirrors().forEach(annotationMirror -> {
+            String annotationTypeName = annotationMirror.getAnnotationType().toString();
+            if (JSR305_ANNOTATIONS.contains(annotationTypeName)) {
+                paramBuilder.addAnnotation(AnnotationSpec.get(annotationMirror));
+            }
+        });
+
+        return paramBuilder.build();
     }
 
     private MethodSpec buildGetterSpec(VariableElement element) {
@@ -173,11 +187,10 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private MethodSpec buildSetterSpec(VariableElement element) {
         final String fieldName = element.getSimpleName().toString();
-        final ParameterSpec value = ParameterSpec.builder(TypeName.get(element.asType()), "value").build();
 
         return MethodSpec
                 .methodBuilder(getMethodName("set", fieldName))
-                .addParameter(value)
+                .addParameter(getParameterSpec(element, "value"))
                 .returns(TypeName.VOID)
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("this.$L = value", fieldName)
