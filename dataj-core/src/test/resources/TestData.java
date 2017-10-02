@@ -7,7 +7,7 @@ public final class TestData {
     String name;
     int age;
 
-    public TestData(String name, int age) {
+    public TestData(@Nonnull String name, int age) {
         this.name = name;
         this.age = age;
     }
