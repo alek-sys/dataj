@@ -1,4 +1,4 @@
-package org.dataj.test;
+package org.dataj.test.matchers;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Strings;

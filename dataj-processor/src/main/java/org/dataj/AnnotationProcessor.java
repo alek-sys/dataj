@@ -6,6 +6,7 @@ import com.squareup.javapoet.*;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,14 +22,20 @@ public class AnnotationProcessor extends AbstractProcessor {
         for (TypeElement element : annotations) {
             for (Element el : roundEnv.getElementsAnnotatedWith(element)) {
                 TypeElement clazz = (TypeElement) el;
-                writeDataClassFor(clazz);
+                try {
+                    writeDataClassFor(clazz);
+                } catch (IOException e) {
+                    Messager messager = processingEnv.getMessager();
+                    String msg = String.format("Failed to generated source: %s", e.getMessage());
+                    messager.printMessage(Diagnostic.Kind.ERROR, msg);
+                }
             }
         }
 
         return false;
     }
 
-    private void writeDataClassFor(TypeElement clazz) {
+    private void writeDataClassFor(TypeElement clazz) throws IOException {
         String builderClassName = clazz.getSimpleName() + "Data";
         String builderFileName = clazz.getQualifiedName() + "Data";
         PackageElement packageElement = (PackageElement) clazz.getEnclosingElement();
@@ -38,33 +45,34 @@ public class AnnotationProcessor extends AbstractProcessor {
 
         copyAnnotations(clazz, classBuilder);
 
-        VariableElement[] variableElements = clazz.getEnclosedElements().stream()
+        VariableElement[] fieldElements = getFieldElements(clazz);
+
+        classBuilder.addMethod(buildConstructorSpec(fieldElements));
+
+        for (VariableElement fieldElement : fieldElements) {
+            classBuilder.addField(buildField(fieldElement));
+            classBuilder.addMethod(buildGetterSpec(fieldElement));
+            classBuilder.addMethod(buildSetterSpec(fieldElement));
+        }
+
+        classBuilder.addMethod(buildHashcodeSpec(fieldElements));
+        classBuilder.addMethod(buildEqualsSpec(fieldElements, builderClassName));
+
+        JavaFile javaFile = JavaFile
+            .builder(packageElement.getQualifiedName().toString(), classBuilder.build())
+            .build();
+
+        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderFileName);
+        try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
+            javaFile.writeTo(out);
+        }
+    }
+
+    private VariableElement[] getFieldElements(TypeElement clazz) {
+        return clazz.getEnclosedElements().stream()
                 .filter(e -> e instanceof VariableElement)
                 .map(e -> (VariableElement) e)
                 .toArray(VariableElement[]::new);
-
-        classBuilder.addMethod(buildConstructorSpec(variableElements));
-
-        for (VariableElement variableElement : variableElements) {
-            classBuilder.addField(buildField(variableElement));
-            classBuilder.addMethod(buildGetterSpec(variableElement));
-            classBuilder.addMethod(buildSetterSpec(variableElement));
-        }
-
-        classBuilder.addMethod(buildHashcodeSpec(variableElements));
-        classBuilder.addMethod(buildEqualsSpec(variableElements, builderClassName));
-
-        JavaFile javaFile = JavaFile.builder(packageElement.getQualifiedName().toString(), classBuilder.build())
-                .build();
-
-        try {
-            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderFileName);
-            try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
-                javaFile.writeTo(out);
-            }
-        } catch (IOException ex) {
-
-        }
     }
 
     private void copyAnnotations(TypeElement clazz, TypeSpec.Builder classBuilder) {
@@ -79,9 +87,9 @@ public class AnnotationProcessor extends AbstractProcessor {
     private MethodSpec buildEqualsSpec(VariableElement[] fields, String ownType) {
         final Object[] fieldNames = getFieldNames(fields);
 
-        ArrayList<String> strs = new ArrayList<>();
+        ArrayList<String> sourceLines = new ArrayList<>();
         for (int i = 1; i <= fieldNames.length; i++) {
-            strs.add(String.format("Objects.equals($%dL, other.$%dL)", i + 1, i + 1));
+            sourceLines.add(String.format("Objects.equals($%dL, other.$%dL)", i + 1, i + 1));
         }
 
         final String pattern = String.format(
@@ -89,7 +97,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 "if (o == null || getClass() != o.getClass()) return false;\n" +
                 "$1L other = ($1L) o;\n" +
                 "return %s",
-                String.join(" && ", strs));
+                String.join(" && ", sourceLines));
 
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)

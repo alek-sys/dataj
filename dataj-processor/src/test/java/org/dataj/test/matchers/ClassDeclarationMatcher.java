@@ -1,4 +1,4 @@
-package org.dataj.test;
+package org.dataj.test.matchers;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -7,7 +7,7 @@ import org.hamcrest.Description;
 
 import java.util.Optional;
 
-public class ClassDeclarationMatcher extends BaseMatcher<CompilationUnit> {
+class ClassDeclarationMatcher extends BaseMatcher<CompilationUnit> {
     private final CompilationUnit compilationUnit;
     private final String className;
 

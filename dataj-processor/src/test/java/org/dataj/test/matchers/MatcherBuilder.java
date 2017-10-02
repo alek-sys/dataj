@@ -1,8 +1,8 @@
-package org.dataj.test;
+package org.dataj.test.matchers;
 
 import com.github.javaparser.ast.CompilationUnit;
 import org.hamcrest.BaseMatcher;
 
-public interface MatcherBuilder {
+interface MatcherBuilder {
     BaseMatcher<CompilationUnit> build(CompilationUnit compilationUnit);
 }

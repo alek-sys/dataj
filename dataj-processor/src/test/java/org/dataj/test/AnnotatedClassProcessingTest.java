@@ -1,3 +1,5 @@
+package org.dataj.test;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.testing.compile.Compilation;
@@ -11,14 +13,13 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 
 import static com.google.testing.compile.Compiler.javac;
-import static org.dataj.test.ClassDeclarationMatcherBuilder.classNamed;
-import static org.dataj.test.CompilationUnitMatcherBuilder.andCompilationUnit;
+import static org.dataj.test.matchers.ClassDeclarationMatcherBuilder.classNamed;
+import static org.dataj.test.matchers.CompilationUnitMatcherBuilder.andCompilationUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisplayName("when processing a class with annotations")
 class AnnotatedClassProcessingTest {
 
-    private Compilation compilation;
     private CompilationUnit referenceSource;
     private CompilationUnit actualSource;
 
@@ -26,11 +27,11 @@ class AnnotatedClassProcessingTest {
     void setUp() throws Exception {
         String source = "package com.example; import org.dataj.Data; @Entity @Data class Annotated { int age; }";
 
-        compilation = javac()
+        Compilation compilation = javac()
                 .withProcessors(new AnnotationProcessor())
                 .compile(
-                    JavaFileObjects.forResource("Entity.java"),
-                    JavaFileObjects.forSourceString("Annotated", source)
+                        JavaFileObjects.forResource("Entity.java"),
+                        JavaFileObjects.forSourceString("Annotated", source)
                 );
 
         JavaFileObject outputFile = compilation.generatedSourceFile("com.example.AnnotatedData").get();
