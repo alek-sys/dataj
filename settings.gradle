@@ -1,1 +1,6 @@
-include 'dataj-processor', 'examples:dataj-hibernate', 'examples:dataj-sample'
+include 'dataj-processor'
+
+file('examples').eachDir { dir ->
+    include dir.name
+    project(":${dir.name}").projectDir = dir
+}
