@@ -1,4 +1,4 @@
-include 'dataj-processor'
+include 'dataj-core'
 
 file('examples').eachDir { dir ->
     include dir.name

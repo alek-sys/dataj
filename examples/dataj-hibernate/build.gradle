@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 dependencies {
-    compile 'org.dataj:dataj-processor:0.1'
+    compile 'org.dataj:dataj-core:0.1'
     compile 'org.hibernate:hibernate-core:5.2.11.Final'
     runtime 'com.h2database:h2:1.4.196'
 
