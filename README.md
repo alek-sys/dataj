@@ -9,13 +9,23 @@ A data class is basically a Java class with defined getters, setters and methods
 # Quickstart
 
 ## Gradle
-TODO
+In `build.gradle` add a new dependency:
+```groovy
+compile 'org.dataj:dataj-core:0.1'
+```
 
 ## Maven
-TODO
+In `pom.xml` add a new dependency:
+```xml
+<dependency>
+    <groupId>org.dataj</groupId>
+    <artifactId>dataj-core</artifactId>
+    <version>0.1</version>
+</dependency>
+```
 
 ## Intellij IDEA
-TODO 
+If you want to get full IDE support from IDEA you need to enable *Annotation processing*. Open settings and in *Build, Execution, Deployment > Compiler > Annotation Processors* enable annotation processing for the project. Also you can specify what folders should annotation processor use to put generated sources to. This folder should then be marked as *Generated sources* root to enable compilation and all IDE features.   
 
 # Why not use Lombok?
 
