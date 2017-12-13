@@ -4,6 +4,6 @@ set -e -x
 
 cd sources
 
-./gradew :dataj-core:build
+./gradlew :dataj-core:build
 
 cp dataj-core/build/libs/* ../build
