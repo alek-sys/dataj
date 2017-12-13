@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e -x
+
+cd sources
+
+./gradew :dataj-core:build
+
+cp dataj-core/build/libs/* ../build
