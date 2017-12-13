@@ -2,7 +2,7 @@ resources:
 - name: sources
   type: git
   source:
-    uri: https://github.com/alek-sys/ohmypwd
+    uri: https://github.com/alek-sys/dataj
 
 jobs:
 - name: build
