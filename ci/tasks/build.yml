@@ -3,12 +3,10 @@ image_resource:
   type: docker-image
   source:
     repository: openjdk
-    tag: "9"
+    tag: "8"
 inputs:
   - name: sources
 outputs:
   - name: build
-params:
-  JDK_VERSION: 9
 run:
   path: sources/ci/tasks/build.sh

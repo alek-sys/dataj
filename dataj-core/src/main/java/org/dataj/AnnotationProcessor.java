@@ -30,7 +30,7 @@ import java.io.PrintWriter;
 import java.util.*;
 
 @SupportedAnnotationTypes("org.dataj.Data")
-@SupportedSourceVersion(SourceVersion.RELEASE_9)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class AnnotationProcessor extends AbstractProcessor {
 
