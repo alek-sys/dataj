@@ -11,3 +11,6 @@ jobs:
       trigger: true
     - task: build
       file: sources/ci/tasks/build.yml
+      params:
+        OSSRHUSER: {{ossrhUser}}
+        OSSRHPASSWORD: {{ossrhPassword}}

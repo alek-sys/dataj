@@ -8,5 +8,8 @@ inputs:
   - name: sources
 outputs:
   - name: build
+params:
+  OSSRHUSER:
+  OSSRHPASSWORD:
 run:
   path: sources/ci/tasks/build.sh
