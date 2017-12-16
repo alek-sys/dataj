@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e -x
+set -e
 
 mkdir ~/.gradle/
 touch ~/.gradle/gradle.properties
